@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Threads Manager</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: #f0f2f5; min-height: 100vh; }
+    header { background: white; padding: 16px 32px; border-bottom: 1px solid #eee;
+             display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 18px; }
+    .badge { background: #e8f5e9; color: #2e7d32; padding: 4px 12px;
+             border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .container { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+             gap: 16px; margin-bottom: 32px; }
+    .stat { background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .stat .num { font-size: 32px; font-weight: 700; color: #1a1a1a; }
+    .stat .label { font-size: 13px; color: #888; margin-top: 4px; }
+    table { width: 100%; background: white; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-collapse: collapse; overflow: hidden; }
+    th { background: #f8f9fa; padding: 14px 16px; text-align: left;
+         font-size: 13px; color: #666; font-weight: 600; }
+    td { padding: 14px 16px; border-top: 1px solid #f0f0f0; font-size: 14px; }
+    .token-cell { font-family: monospace; font-size: 12px; color: #888;
+                  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .copy-btn { background: #f0f0f0; border: none; padding: 4px 10px;
+                border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .copy-btn:hover { background: #e0e0e0; }
+    .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333; }
+    .link-box { background: white; border-radius: 12px; padding: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+    .link-box input { width: 100%; padding: 10px; border: 1px solid #ddd;
+                      border-radius: 8px; font-size: 14px; margin: 8px 0; }
+    .link-box button { background: #000; color: white; border: none; padding: 10px 20px;
+                       border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .empty { text-align: center; padding: 40px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧵 Threads Manager</h1>
+    <span class="badge">{{ accounts|length }} tài khoản</span>
+  </header>
+
+  <div class="container">
+    <!-- Tạo link mời khách -->
+    <div class="link-box">
+      <div class="section-title">📤 Tạo link kết nối cho khách hàng</div>
+      <input type="text" id="customerInput" placeholder="Nhập tên khách hàng (VD: nguyen-van-a)">
+      <button onclick="generateLink()">Tạo link</button>
+      <input type="text" id="resultLink" placeholder="Link sẽ hiện ở đây..." readonly>
+      <button onclick="copyLink()">📋 Copy link</button>
+    </div>
+
+    <!-- Danh sách tài khoản -->
+    <div class="section-title">📋 Danh sách tài khoản đã kết nối</div>
+    {% if accounts %}
+    <table>
+      <thead>
+        <tr>
+          <th>Khách hàng</th>
+          <th>@Username</th>
+          <th>Token (dùng để đăng bài)</th>
+          <th>Ngày kết nối</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, info in accounts.items() %}
+        <tr>
+          <td><strong>{{ name }}</strong></td>
+          <td>@{{ info.username }}</td>
+          <td class="token-cell" id="token-{{ loop.index }}">{{ info.token }}</td>
+          <td>{{ info.connected_at }}</td>
+          <td>
+            <button class="copy-btn" onclick="copyToken('token-{{ loop.index }}')">Copy token</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty" style="background:white;border-radius:12px;">
+      <p>Chưa có tài khoản nào. Hãy tạo link và gửi cho khách hàng!</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function generateLink() {
+      const name = document.getElementById('customerInput').value.trim();
+      if (!name) { alert('Nhập tên khách hàng!'); return; }
+      const link = window.location.origin + '/connect/' + encodeURIComponent(name);
+      document.getElementById('resultLink').value = link;
+    }
+    function copyLink() {
+      const val = document.getElementById('resultLink').value;
+      if (!val) { alert('Tạo link trước!'); return; }
+      navigator.clipboard.writeText(val);
+      alert('Đã copy link!');
+    }
+    function copyToken(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text);
+      alert('Đã copy token!');
+    }
+  </script>
+</body>
+</html>
